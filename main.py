@@ -1,9 +1,6 @@
 import numpy as np
 import pandas as pd
-import matplotlib.pyplot as plt
-import seaborn as sns
-from sklearn import metrics
-from io import StringIO
+
 
 df = pd.read_csv('clone7 (1).csv')
 X = pd.concat([df.iloc[:,1], df.iloc[:,2], df.iloc[:,3],df.iloc[:,4],df.iloc[:,5],df.iloc[:,6],df.iloc[:,7]], axis=1)
@@ -65,54 +62,6 @@ X.drop(index=upper_array_pH, inplace=True)
 X.drop(index=lower_array_pH, inplace=True)
 X.reset_index(drop=True, inplace = True)
 
-#Check outliner
-plt.figure(figsize=(20,5))
-plt.subplot(1,5,1)
-sns.boxplot(X.HCO3)
-plt.subplot(1,5,2)
-sns.boxplot(X.Ca)
-plt.subplot(1,5,3)
-sns.boxplot(X.Mg)
-plt.subplot(1,5,4)
-sns.boxplot(X.pH)
-plt.subplot(1,5,5)
-sns.boxplot(X.TDS)
-plt.show()
-# kiểm tra distance
-plt.figure(figsize=(20,5))
-plt.subplot(1,5,1)
-sns.histplot(X.HCO3)
-plt.subplot(1,5,2)
-sns.histplot(X.Ca)
-plt.subplot(1,5,3)
-sns.histplot(X.Mg)
-plt.subplot(1,5,4)
-sns.histplot(X.pH)
-plt.subplot(1,5,5)
-sns.histplot(X.TDS)
-plt.show()
-
-# Running the Shapiro-Wilk Test on Normal Data
-from scipy.stats import shapiro
-def shapiro_test(data, alpha = 0.05):
-    stat, p = shapiro(data)
-    if p > alpha:
-        print('Shapiro-Wilk test: Gaussian, p-value = ', p)
-    else:
-        print('Shapiro-Wilk test: Not Gaussian, p-value = ', p)
-print("Ca:")
-shapiro_test(X[['Ca']])
-print("\nMg:")
-shapiro_test(X[['Mg']])
-print("\nHCO3:")
-shapiro_test(X[['HCO3']])
-print("\nTDS:")
-shapiro_test(X[['TDS']])
-print("\npH:")
-shapiro_test(X[['pH']])
-
-
-
 from imblearn.over_sampling import SMOTE
 oversample = SMOTE()
 X_over = X[['HCO3','pH','TDS','Ca','Mg']]
@@ -121,12 +70,6 @@ X_over, y_over = oversample.fit_resample(X_over, y_over)
 
 target = pd.DataFrame(y_over,columns=['Precipitation'])
 df_over = pd.concat([X_over,target],axis=1)
-#chỉ mở khi muốn over sampling lại
-'''
-from google.colab import drive
-drive.mount('drive')
-df_over.to_csv('/content/drive/My Drive/Colab_Notebooks/Random_forest_deployed/after_over_sampling.csv')
-'''
 
 df_over = pd.read_csv('after_over_sampling.csv')
 df_over = pd.concat([df_over.iloc[:,1], df_over.iloc[:,2],df_over.iloc[:,3],df_over.iloc[:,4],df_over.iloc[:,5],df_over.iloc[:,6]], axis=1)
@@ -147,7 +90,6 @@ df_after_scale= df_after_scale.dropna()
 
 # importing random forest classifier from assemble module
 from sklearn.ensemble import RandomForestClassifier, VotingClassifier
-import pandas as pd
 from sklearn.model_selection import train_test_split
 
 X_train, X_test, y_train, y_test = train_test_split(df_after_scale[['rb_HCO3','rb_Mg','rb_Ca','rb_pH','rb_TDS']],df_after_scale[['Precipitation']], test_size=0.2, random_state=0)
@@ -175,8 +117,6 @@ indices = np.argsort(importances)
 from flask_ngrok import run_with_ngrok
 from flask import Flask, request, render_template
 from flask.templating import render_template
-import numpy as np
-
 
 # create app
 
